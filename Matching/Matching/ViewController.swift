@@ -15,8 +15,9 @@ import CoreLocation
 class ViewController: UIViewController, CLLocationManagerDelegate {
     let locationManager = CLLocationManager()
     
+    @IBOutlet weak var radiusLabel: UILabel!
     @IBOutlet weak var mapView: MKMapView!
-    let regionRadius: CLLocationDistance = 1000
+    var regionRadius: Int = 1000
     var addresses = [AddressLocation]()
     var addressURL:String?
     override func viewDidLoad() {
@@ -35,15 +36,16 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
             self.mapView.showsUserLocation = true
             
             let coord = self.locationManager.location?.coordinate
-            print(coord)
-//            let locationArray = locations as? NSArray
-//            let locationObj = locationArray!.lastObject as! CLLocation
-//            let coord = locationObj.coordinate
+
+
             let lng = coord!.longitude
             let lat = coord!.latitude
-//            //        lat=21.0319556&lng=105.7993006
             addressURL = "lat=\(lat)&lng=\(lng)"
-            print(addressURL)
+            
+//            print(coord)
+            let coordinateRegion = MKCoordinateRegionMakeWithDistance(coord!,CLLocationDistance(regionRadius) * 2.0, CLLocationDistance(regionRadius) * 2.0)
+            self.mapView.setRegion(coordinateRegion, animated: true)
+            
         } else {
             print("Location services are not enabled")
             let alert = UIAlertController(title: "Location Services Disable", message: "Please go to Setting > Privacy >    Location Services > Enable", preferredStyle: UIAlertControllerStyle.Alert)
@@ -72,13 +74,8 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
                 let longitude = subJson["lng"].object as! Float
                 let coordinate = CLLocationCoordinate2D(latitude: Double(latitude), longitude: Double(longitude))
                 let address = AddressLocation(address: addressLocation!, title: locationName!, discipline: discipline!, coordinate: coordinate)
-//                let objectAnnotation = MKPointAnnotation()
-//                objectAnnotation.coordinate = coordinate
-//                objectAnnotation.title = locationName
-//                objectAnnotation.subtitle = addressLocation
-//                self.mapView.addAnnotation(objectAnnotation)
-               self.mapView.addAnnotation(address)
-                
+                              self.mapView.addAnnotation(address)
+
 //                print(json)
 
             }
@@ -91,8 +88,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
     func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation])
     {
         
-//        longitude.text = "\(coord.longitude)"
-//        latitude.text = "\(coord.latitude)"
+
         let location = locations.last
         let center = CLLocationCoordinate2D(latitude: location!.coordinate.latitude, longitude: location!.coordinate.longitude)
 
@@ -101,7 +97,7 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
         self.mapView.setRegion(region, animated: true)
         
         self.locationManager.stopUpdatingLocation()
-        let coordinateRegion = MKCoordinateRegionMakeWithDistance(center,regionRadius * 2.0, regionRadius * 2.0)
+        let coordinateRegion = MKCoordinateRegionMakeWithDistance(center,CLLocationDistance(regionRadius) * 2.0, CLLocationDistance(regionRadius) * 2.0)
         mapView.setRegion(coordinateRegion, animated: true)
 
     }
@@ -120,30 +116,21 @@ class ViewController: UIViewController, CLLocationManagerDelegate {
 
         } else {
             print("Location services are not enabled")
-            let alert = UIAlertController(title: "Location Services Disable", message: "Please go to Setting > Privacy >    Location Services > Enable", preferredStyle: UIAlertControllerStyle.Alert)
+            let alert = UIAlertController(title: "Location Services Disable", message: "Please go to Setting > Privacy >   Location Services > Enable", preferredStyle: UIAlertControllerStyle.Alert)
             alert.addAction(UIAlertAction(title: "Click", style: UIAlertActionStyle.Default, handler: nil))
             self.presentViewController(alert, animated: true, completion: nil)
             
         
         }
     }
-    @IBAction func getRequest5000m(sender: AnyObject) {
+    @IBAction func getRequestRadius(sender: UISlider) {
         mapView.removeAnnotations(mapView.annotations)
-
-        self.addDummyData(5000)
-       
-        mapView.removeAnnotations(mapView.annotations)
-
-
-        
+        regionRadius = Int(sender.value)
+        self.addDummyData(Int(sender.value))
+        radiusLabel.text = "\(Int(sender.value))"
+        print("\(Int(sender.value))")
     }
-    @IBAction func getRequest500m(sender: AnyObject) {
-        mapView.removeAnnotations(mapView.annotations)
-
-        self.addDummyData(500)
-        mapView.removeAnnotations(mapView.annotations)
-
-    }
+  
     
     
 }

@@ -25,12 +25,20 @@ class restApiManager: NSObject {
         let session = NSURLSession.sharedSession()
         
         let task = session.dataTaskWithRequest(request, completionHandler: {data, response, error -> Void in
-            if JSON.init(data: data!) == nil {
-                print("Service not activity")
-            } else {
-            let json:JSON = JSON(data: data!)
-            onCompletion(json, error)
-            }
+//            guard error == nil && data != nil else {                                                          // check for fundamental networking error
+//                print("error=\(error)")
+//                return
+//            }
+//            if let httpStatus = response as? NSHTTPURLResponse where httpStatus.statusCode != 200 {           // check for http errors
+//                print("statusCode should be 200, but is \(httpStatus.statusCode)")
+//                print("response = \(response)")
+//            } else {
+                let json:JSON = JSON(data: data!)
+                onCompletion(json, error)
+//            }
+ 
+            
+            
         })
         task.resume()
     }
